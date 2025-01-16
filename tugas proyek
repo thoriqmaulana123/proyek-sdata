@@ -1,0 +1,282 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <queue>
+#include <stack>
+#include <conio.h>
+
+using namespace std;
+
+// Struct untuk KTP
+struct KTP {
+    string nik;
+    string nama;
+    string provinsi;
+    string kabupaten;
+    string ttl;
+    string jk;
+    string goldar;
+    string alamat;
+    string rt;
+    string rw;
+    string kelDesa;
+    string kecamatan;
+    string agama;
+    string statusPerkawinan;
+    string pekerjaan;
+    string kewarganegaraan;
+    string berlakuHingga = "SEUMUR HIDUP";
+};
+
+// Struct untuk Barang
+struct Barang {
+    string kodeItem;
+    string tanggalMasuk;
+};
+
+// Struct untuk Pembeli
+struct Pembeli {
+    string nik;
+    string nama;
+    string waktuKedatangan;
+    string kodeItem;
+};
+
+// Global Variables
+stack<Barang> lifoGudang;
+queue<Pembeli> antrianPembeli;
+KTP adminKTP;
+
+// Fungsi untuk validasi admin sign-in
+bool adminSignIn(KTP ktpData[], int jumlah) {
+    string nik, nama;
+    
+    cout << "=== Admin Sign-In ===\n";
+    cout << "Masukkan NIK: ";
+    cin >> nik;
+    cin.ignore();
+    cout << "Masukkan Nama: ";
+    getline(cin, nama);
+
+    for (int i = 0; i < jumlah; i++) {
+        if (ktpData[i].nik == nik && ktpData[i].nama == nama) {
+            adminKTP = ktpData[i];
+            cout << "========================================" << nama << ".\n";
+            cout << "Sign-in berhasil! Selamat datang, " << nama << ".\n";
+            cout << "========================================" << nama << ".\n";
+            return true;
+        }
+    }
+    cout << "Sign-in gagal! Data tidak ditemukan.\n";
+    return false;
+}
+
+// Fungsi untuk input KTP
+void inputKTP(KTP ktpData[], int &jumlah, int MAX) {
+    if (jumlah >= MAX) {
+        cout << "Data sudah penuh, tidak dapat menambah KTP lagi.\n";
+        return;
+    }
+    
+    cin.ignore();
+    cout << "\nMasukkan data KTP ke-" << jumlah + 1 << endl;
+    cout << "Masukkan NIK: ";
+    getline(cin, ktpData[jumlah].nik);
+    cout << "Masukkan Nama: ";
+    getline(cin, ktpData[jumlah].nama);
+    cout << "Masukkan Provinsi: ";
+    getline(cin, ktpData[jumlah].provinsi);
+    cout << "Masukkan Kabupaten: ";
+    getline(cin, ktpData[jumlah].kabupaten);
+    cout << "Masukkan Tempat Tanggal Lahir: ";
+    getline(cin, ktpData[jumlah].ttl);
+    cout << "Masukkan Jenis Kelamin: ";
+    getline(cin, ktpData[jumlah].jk);
+    cout << "Masukkan Golongan Darah: ";
+    getline(cin, ktpData[jumlah].goldar);
+    cout << "Masukkan Alamat: ";
+    getline(cin, ktpData[jumlah].alamat);
+    cout << "Masukkan RT: ";
+    getline(cin, ktpData[jumlah].rt);
+    cout << "Masukkan RW: ";
+    getline(cin, ktpData[jumlah].rw);
+    cout << "Masukkan Kel/Desa: ";
+    getline(cin, ktpData[jumlah].kelDesa);
+    cout << "Masukkan Kecamatan: ";
+    getline(cin, ktpData[jumlah].kecamatan);
+    cout << "Masukkan Agama: ";
+    getline(cin, ktpData[jumlah].agama);
+    cout << "Masukkan Status Perkawinan: ";
+    getline(cin, ktpData[jumlah].statusPerkawinan);
+    cout << "Masukkan Pekerjaan: ";
+    getline(cin, ktpData[jumlah].pekerjaan);
+    cout << "Masukkan Kewarganegaraan: ";
+    getline(cin, ktpData[jumlah].kewarganegaraan);
+    jumlah++;
+    cout << "Data berhasil disimpan.\n";
+}
+ 
+
+// Fungsi untuk output KTP
+void outputKTP(KTP ktpData[], int jumlah) {
+    if (jumlah == 0) {
+        cout << "Tidak ada data KTP yang dapat ditampilkan.\n";
+        return;
+    }
+    for (int i = 0; i < jumlah; i++) {
+        cout << "\nData KTP ke-" << i + 1 << endl;
+        cout << "----------------------------------------\n";
+        cout << "NIK: " << ktpData[i].nik << endl;
+        cout << "Nama: " << ktpData[i].nama << endl;
+        cout << "Provinsi: " << ktpData[i].provinsi << endl;
+        cout << "Kabupaten: " << ktpData[i].kabupaten << endl;
+        cout << "Tempat/Tgl Lahir: " << ktpData[i].ttl << endl;
+        cout << "Jenis Kelamin: " << ktpData[i].jk << endl;
+        cout << "Golongan Darah: " << ktpData[i].goldar << endl;
+        cout << "Alamat: " << ktpData[i].alamat << endl;
+        cout << "RT/RW: " << ktpData[i].rt << "/" << ktpData[i].rw << endl;
+        cout << "Kel/Desa: " << ktpData[i].kelDesa << endl;
+        cout << "Kecamatan: " << ktpData[i].kecamatan << endl;
+        cout << "Agama: " << ktpData[i].agama << endl;
+        cout << "Status Perkawinan: " << ktpData[i].statusPerkawinan << endl;
+        cout << "Pekerjaan: " << ktpData[i].pekerjaan << endl;
+        cout << "Kewarganegaraan: " << ktpData[i].kewarganegaraan << endl;
+        cout << "Berlaku Hingga: " << ktpData[i].berlakuHingga << endl;
+        cout << "----------------------------------------\n";
+    }
+}
+
+// Fungsi untuk menyimpan KTP ke file
+void simpanKTP(KTP ktpData[], int jumlah) {
+    ofstream file("data_ktp.txt");
+    if (!file.is_open()) {
+        cout << "Gagal membuka file untuk menyimpan data.\n";
+        return;
+    }
+    for (int i = 0; i < jumlah; i++) {
+        file << "=== Data KTP ke-" << i + 1 << " ===\n";
+        file << "NIK: " << ktpData[i].nik << endl;
+        file << "Nama: " << ktpData[i].nama << endl;
+        file << "Provinsi: " << ktpData[i].provinsi << endl;
+        file << "Kabupaten: " << ktpData[i].kabupaten << endl;
+        file << "Tempat/Tgl Lahir: " << ktpData[i].ttl << endl;
+        file << "Jenis Kelamin: " << ktpData[i].jk << endl;
+        file << "Golongan Darah: " << ktpData[i].goldar << endl;
+        file << "Alamat: " << ktpData[i].alamat << endl;
+        file << "RT/RW: " << ktpData[i].rt << "/" << ktpData[i].rw << endl;
+        file << "Kel/Desa: " << ktpData[i].kelDesa << endl;
+        file << "Kecamatan: " << ktpData[i].kecamatan << endl;
+        file << "Agama: " << ktpData[i].agama << endl;
+        file << "Status Perkawinan: " << ktpData[i].statusPerkawinan << endl;
+        file << "Pekerjaan: " << ktpData[i].pekerjaan << endl;
+        file << "Kewarganegaraan: " << ktpData[i].kewarganegaraan << endl;
+        file << "Berlaku Hingga: " << ktpData[i].berlakuHingga << endl;
+        file << "============================\n";
+        // Data lain bisa ditambahkan seperti pada output.
+    }
+    file.close();
+    cout << "Data berhasil disimpan ke file 'data_ktp.txt'.\n";
+}
+
+// Fungsi untuk menambah barang
+void tambahBarang() {
+    int jumlahBarang;
+    cout << "Masukkan jumlah barang yang akan ditambahkan: ";
+    cin >> jumlahBarang;
+
+    for (int i = 0; i < jumlahBarang; i++) {
+        Barang barang;
+        cout << "\nMasukkan Kode Item barang ke-" << i + 1 << ": ";
+        cin >> barang.kodeItem;
+        cout << "Masukkan Tanggal Masuk barang ke-" << i + 1 << ": ";
+        cin >> barang.tanggalMasuk;
+
+        lifoGudang.push(barang);
+        cout << "Barang ke-" << i + 1 << " berhasil ditambahkan ke gudang.\n";
+    }
+    cout << "Semua barang berhasil ditambahkan ke gudang.\n";
+}
+
+
+// Fungsi untuk mencatat pembeli
+void catatPembeli(KTP ktpData[], int jumlah) {
+    string nik;
+    cout << "Masukkan NIK Pembeli: ";
+    cin >> nik;
+
+    bool ditemukan = false;
+    Pembeli pembeli;
+    for (int i = 0; i < jumlah; i++) {
+        if (ktpData[i].nik == nik) {
+            pembeli.nik = ktpData[i].nik;
+            pembeli.nama = ktpData[i].nama;
+            ditemukan = true;
+            break;
+        }
+    }
+
+    if (!ditemukan) {
+        cout << "NIK tidak ditemukan dalam data KTP.\n";
+        return;
+    }
+
+    cout << "Masukkan Waktu Kedatangan (HH:MM): ";
+    cin >> pembeli.waktuKedatangan;
+    antrianPembeli.push(pembeli);
+    cout << "Pembeli berhasil dicatat.\n";
+}
+
+// Fungsi untuk menjual barang
+void jualBarang() {
+    if (antrianPembeli.empty()) {
+        cout << "Tidak ada pembeli dalam antrian.\n";
+        return;
+    }
+    if (lifoGudang.empty()) {
+        cout << "Gudang kosong.\n";
+        return;
+    }
+
+    Pembeli pembeli = antrianPembeli.front();
+    antrianPembeli.pop();
+
+    Barang barang = lifoGudang.top();
+    lifoGudang.pop();
+
+    cout << "Pembeli " << pembeli.nama << " membeli barang " << barang.kodeItem << ".\n";
+}
+
+// Fungsi untuk mencetak barang
+void cetakBarang() {
+    stack<Barang> temp = lifoGudang;
+    while (!temp.empty()) {
+        Barang barang = temp.top();
+        temp.pop();
+        cout << barang.kodeItem << " masuk pada " << barang.tanggalMasuk << endl;
+    }
+}
+
+int main() {
+    const int MAX = 10;
+    KTP ktpData[MAX];
+    int jumlahKTP = 0;
+
+    while (true) {
+        int pilihan;
+        cout << "\n1. Admin Sign-In\n2. Input KTP\n3. Output KTP\n4. Simpan ke File\n5. Tambah Barang\n6. Catat Pembeli\n7. Jual Barang\n8. Cetak Barang\n0. Exit\n";
+        cout << "Masukkan pilihan Anda: "; // Tambahkan ini
+        cin >> pilihan;
+        switch (pilihan) {
+            case 1: adminSignIn(ktpData, jumlahKTP); break;
+            case 2: inputKTP(ktpData, jumlahKTP, MAX); break;
+            case 3: outputKTP(ktpData, jumlahKTP); break;
+            case 4: simpanKTP(ktpData, jumlahKTP); break;
+            case 5: tambahBarang(); break;
+            case 6: catatPembeli(ktpData, jumlahKTP); break;
+            case 7: jualBarang(); break;
+            case 8: cetakBarang(); break;
+            case 0: return 0;
+            default: cout << "Pilihan tidak valid.\n";
+        }
+    }
+}
